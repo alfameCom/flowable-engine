@@ -35,6 +35,7 @@ flowableAdminApp.controller('ProcessInstancesController', ['$rootScope', '$scope
 			</button>
 			</div>
 		`
+
 		var reduceProcessDefinitions = function(definitions) {
 			if(!definitions.data.length) return definitions
 
@@ -125,7 +126,7 @@ flowableAdminApp.controller('ProcessInstancesController', ['$rootScope', '$scope
 	    }
 
 	    $scope.processInstanceSelected = function(id) {
-            if(!id) return;
+			if(!id) return;
 
             $location.path('/process-instance/' + id);
       };
