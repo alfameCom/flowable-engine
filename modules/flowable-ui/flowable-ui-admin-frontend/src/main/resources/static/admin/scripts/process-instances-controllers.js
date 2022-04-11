@@ -28,6 +28,23 @@ flowableAdminApp.controller('ProcessInstancesController', ['$rootScope', '$scope
 		$scope.variableFilterTypes = FlowableAdmin.Utils.variableFilterTypes;
 		$scope.variableFilterOperators = FlowableAdmin.Utils.variableFilterOperators;
 
+		var reduceProcessDefinitions = function(definitions) {
+			if(!definitions.data.length) return definitions
+
+			var reducedData = definitions.data.reduce(function (total, obj) {
+				let key = obj["key"];
+				if (!total[key]) {
+					total[key] = [];
+				}
+				total[key].push(obj);
+				return total;
+			}, {});
+
+			definitions.data = reducedData
+
+			return definitions
+		}
+
 	    var filterConfig = {
 	    	url: FlowableAdmin.Config.adminContextRoot + 'rest/admin/process-instances',
 	    	method: 'POST',
@@ -37,8 +54,7 @@ flowableAdminApp.controller('ProcessInstancesController', ['$rootScope', '$scope
                 }
                 else {
 	                $rootScope.loadProcessDefinitionsCache().then(function(promise) {
-	        			$rootScope.processDefinitionsCache = promise.data;
-
+	        			$rootScope.processDefinitionsCache = reduceProcessDefinitions(promise.data);
 	        			$scope.definitionCacheLoaded = true;
 	        			$scope.processQueryResponse(data);
 	        		});
@@ -245,25 +261,26 @@ flowableAdminApp.controller('ProcessInstancesController', ['$rootScope', '$scope
 
 				// Fallback to id, of process definition doesn't have a name (getProcessDefinitionFromCache returns null if not found)
 				if ((processInstancesResponse.data[i].processDefinition === null || processInstancesResponse.data[i].processDefinition === undefined) && processInstancesResponse.data[i].processDefinitionId) {
-				    processInstancesResponse.data[i].processDefinition = { id: processInstancesResponse.data[i].processDefinitionId, name: processInstancesResponse.data[i].processDefinitionId }
+				    processInstancesResponse.data[i].processDefinition = {
+						id: processInstancesResponse.data[i].processDefinitionId,
+						name: processInstancesResponse.data[i].processDefinitionId,
+						key: processInstancesResponse.data[i].processDefinitionId.split(":")?.[0]		// Get only the key
+					}
 				}
 
+				processInstancesResponse.data[i].processDefinitionKey = processInstancesResponse.data[i].processDefinitionId.split(":")?.[0];
             }
 			$scope.processInstances = processInstancesResponse;
         };
 
         $scope.processDefinitionFilterChanged = function() {
-        	if ($scope.filter.processDefinition && $scope.filter.processDefinition !== '-1') {
-        		$scope.filter.properties.processDefinitionId = $scope.filter.processDefinition;
-        		$scope.filter.refresh();
-        		
-        	} else {
-        		var tempProcessDefinitionId = $scope.filter.properties.processDefinitionId;
-        		$scope.filter.properties.processDefinitionId = null;
-        		if (tempProcessDefinitionId && tempProcessDefinitionId.length > 0) {
-        			$scope.filter.refresh();
-        		}
-        	}
+			var hasProcessDefinitionKey = $scope.filter.processDefinitionKey && $scope.filter.processDefinitionKey !== '-1';
+			var hasProcessDefinitionId = $scope.filter.processDefinitionId && $scope.filter.processDefinitionId !== '-1';
+
+			$scope.filter.properties.processDefinitionKey = hasProcessDefinitionKey ? $scope.filter.processDefinitionKey : null;
+			$scope.filter.properties.processDefinitionId = hasProcessDefinitionId ? $scope.filter.processDefinitionId : null;
+
+			$scope.filter.refresh();
         };
 
         $scope.executeWhenReady(function() {

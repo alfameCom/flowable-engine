@@ -237,6 +237,7 @@
             "NAME": "Name",
             "PROCESS-DEFINITION": "Process definition",
             "ALL-PROCESS-DEFINITIONS": "All process definitions",
+            "ALL-PROCESS-DEFINITION-VERSIONS": "All process definition versions",
             "STATUS": "Status",
             "STATUS-ANY": "Any status",
             "STATUS-ACTIVE": "Active instances",
@@ -251,7 +252,8 @@
             "VARIABLE-NAME": "Variable name",
             "VARIABLE-VALUE": "Variable value",
             "VARIABLE-BOOLEAN-VALUE": "Boolean value: {{value}}",
-            "TENANT-ID": "Tenant identifier"
+            "TENANT-ID": "Tenant identifier",
+            "VERSION": "Version"
         },
         "SORT": {
             "ID": "ID",

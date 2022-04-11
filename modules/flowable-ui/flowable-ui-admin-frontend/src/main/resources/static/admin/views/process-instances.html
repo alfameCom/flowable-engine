@@ -75,12 +75,28 @@
                     <div>
                         <select ui-select2
                                 data-placeholder="{{'PROCESS-INSTANCES.FILTER.ALL-PROCESS-DEFINITIONS' | translate}}"
-                         		ng-model="filter.processDefinition"
+                         		ng-model="filter.processDefinitionKey"
                          		ng-change="processDefinitionFilterChanged()"
                          		style="min-width:250px">
                             <option value=""></option>
                          	<option value="-1">{{'PROCESS-INSTANCES.FILTER.ALL-PROCESS-DEFINITIONS' | translate}}</option>
-                         	<option ng-title="123" ng-repeat="processDefinition in processDefinitionsCache.data" value="{{processDefinition.id}}">{{processDefinition.name ? processDefinition.name : processDefinition.key}} (v{{processDefinition.version}})</option>
+                         	<option ng-title="123" ng-repeat="(reducedKey, processDefinition) in processDefinitionsCache.data" value="{{reducedKey}}">{{reducedKey}}</option>
+                         </select>
+                    </div>
+                </div>
+                <div class="section" ng-show="filter.processDefinitionKey != undefined">
+                    <div class="subtitle"><label translate="PROCESS-INSTANCES.FILTER.VERSION"></label> </div>
+                    <div>
+                         <select ui-select2
+                                data-placeholder="{{'PROCESS-INSTANCES.FILTER.VERSION' | translate}}"
+                         		ng-model="filter.processDefinitionId"
+                         		ng-change="processDefinitionFilterChanged()"
+                         		style="min-width:250px">
+                            <option value=""></option>
+                            <option value="-1">{{'PROCESS-INSTANCES.FILTER.ALL-PROCESS-DEFINITION-VERSIONS' | translate}}</option>
+                            <option ng-title="123" ng-repeat="processDefinition in  processDefinitionsCache.data[filter.processDefinitionKey]" value="{{processDefinition.id}}">
+                                v{{processDefinition.version}}
+                            </option>
                          </select>
                     </div>
                 </div>
