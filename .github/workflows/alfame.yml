@@ -47,19 +47,19 @@ jobs:
 
       - name: Tag lastest flowable-ui image
         if: github.event_name == 'push' && github.ref == 'refs/heads/alfame'
-        run: docker tag flowable/flowable-ui "alfamecom/flowable-ui:${GITHUB_SHA:0:7}"
+        run: docker tag flowable/flowable-ui "ghcr.io/alfamecom/flowable-ui:${GITHUB_SHA:0:7}"
 
       - name: Tag lastest flowable-rest image
         if: github.event_name == 'push' && github.ref == 'refs/heads/alfame'
-        run: docker tag flowable/flowable-rest "alfamecom/flowable-rest:${GITHUB_SHA:0:7}"
+        run: docker tag flowable/flowable-rest "ghcr.io/alfamecom/flowable-rest:${GITHUB_SHA:0:7}"
 
       - name: Push flowable-ui image to GitHub Container Registry
         if: github.event_name == 'push' && github.ref == 'refs/heads/alfame'
-        run: docker push "alfamecom/flowable-ui:${GITHUB_SHA:0:7}"
+        run: docker push "ghcr.io/alfamecom/flowable-ui:${GITHUB_SHA:0:7}"
 
       - name: Push flowable-rest image to GitHub Container Registry
         if: github.event_name == 'push' && github.ref == 'refs/heads/alfame'
-        run: docker push "alfamecom/flowable-rest:${GITHUB_SHA:0:7}"
+        run: docker push "ghcr.io/alfamecom/flowable-rest:${GITHUB_SHA:0:7}"
 
       - name: Logout from GitHub Container Registry
         if: github.event_name == 'push' && github.ref == 'refs/heads/alfame'
