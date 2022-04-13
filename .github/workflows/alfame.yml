@@ -57,5 +57,4 @@ jobs:
         run: docker push "alfamecom/flowable-rest:${GITHUB_SHA:0:7}"
 
       - name: Logout from GitHub Container Registry
-        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
         run: docker logout ghcr.io
