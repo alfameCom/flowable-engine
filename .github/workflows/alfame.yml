@@ -1,0 +1,61 @@
+name: Package
+
+on:
+  push:
+    branches:
+      - alfame
+    paths-ignore:
+      - .github/**
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+
+      - name: Set up Maven cache
+        uses: actions/cache@v1
+        if: github.event_name != 'release'
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Log into GitHub Container Registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Build all images
+        working-directory: ./docker
+        run: ./build-all-images.sh
+
+      - name: Tag lastest flowable-ui image
+        run: docker tag flowable/flowable-ui "alfamecom/flowable-ui:${GITHUB_SHA:0:7}"
+
+      - name: Tag lastest flowable-rest image
+        run: docker tag flowable/flowable-rest "alfamecom/flowable-rest:${GITHUB_SHA:0:7}"
+
+      - name: Push flowable-ui image to GitHub Container Registry
+        run: docker push "alfamecom/flowable-ui:${GITHUB_SHA:0:7}"
+
+      - name: Push flowable-rest image to GitHub Container Registry
+        run: docker push "alfamecom/flowable-rest:${GITHUB_SHA:0:7}"
+
+      - name: Logout from GitHub Container Registry
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        run: docker logout ghcr.io
