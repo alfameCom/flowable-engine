@@ -40,7 +40,6 @@ public class EventModelBuilderImpl implements EventModelBuilder {
 
     protected String key;
     protected Map<String, EventPayload> eventPayloadDefinitions = new LinkedHashMap<>();
-    protected String fullPayloadPropertyName;
 
     public EventModelBuilderImpl(EventRepositoryServiceImpl eventRepository, EventJsonConverter eventJsonConverter) {
         this.eventRepository = eventRepository;
@@ -106,10 +105,18 @@ public class EventModelBuilderImpl implements EventModelBuilder {
         eventPayloadDefinitions.put(name, new EventPayload(name, type));
         return this;
     }
-    
+
     @Override
-    public EventModelBuilder fullPayloadPropertyName(String name) {
-        this.fullPayloadPropertyName = name;
+    public EventModelBuilder metaParameter(String name, String type) {
+        EventPayload payload = new EventPayload(name, type);
+        payload.setMetaParameter(true);
+        eventPayloadDefinitions.put(name, payload);
+        return this;
+    }
+
+    @Override
+    public EventModelBuilder fullPayload(String name) {
+        eventPayloadDefinitions.put(name, EventPayload.fullPayload(name));
         return this;
     }
 
@@ -145,7 +152,6 @@ public class EventModelBuilderImpl implements EventModelBuilder {
         }
 
         eventModel.setPayload(eventPayloadDefinitions.values());
-        eventModel.setFullPayloadPropertyName(fullPayloadPropertyName);
 
         return eventModel;
     }

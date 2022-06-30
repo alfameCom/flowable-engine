@@ -44,18 +44,17 @@ public class EventJsonConverter {
                 for (JsonNode node : payloadNode) {
                     String name = node.path("name").asText(null);
                     String type = node.path("type").asText(null);
-                    
-                    boolean header = node.path("header").asBoolean(false);
-                    if (header) {
-                        eventModel.addHeader(name, type);
-                    }
-                    
-                    boolean correlationParameter = node.path("correlationParameter").asBoolean(false);
-                    if (correlationParameter) {
-                        eventModel.addCorrelation(name, type);
+
+                    EventPayload payload = new EventPayload(name, type);
+                    if (node.path("isFullPayload").asBoolean(false)) {
+                        payload.setFullPayload(true);
                     } else {
-                        eventModel.addPayload(name, type);
+                        payload.setCorrelationParameter(node.path("correlationParameter").asBoolean(false));
+                        payload.setHeader(node.path("header").asBoolean(false));
+                        payload.setMetaParameter(node.path("metaParameter").asBoolean(false));
                     }
+
+                    eventModel.addPayload(payload);
                 }
             }
 
@@ -67,8 +66,6 @@ public class EventJsonConverter {
                     eventModel.addCorrelation(name, type);
                 }
             }
-            
-            eventModel.setFullPayloadPropertyName(modelNode.path("fullPayloadPropertyName").asText(null));
 
             return eventModel;
             
@@ -101,18 +98,22 @@ public class EventJsonConverter {
                     eventPayloadNode.put("type", eventPayload.getType());
                 }
                 
-                if (eventPayload.isHeader()) {
+                if (eventPayload.isHeader() && !eventPayload.isFullPayload()) {
                     eventPayloadNode.put("header", true);
                 }
 
-                if (eventPayload.isCorrelationParameter()) {
+                if (eventPayload.isCorrelationParameter() && !eventPayload.isFullPayload()) {
                     eventPayloadNode.put("correlationParameter", true);
                 }
+                
+                if (eventPayload.isFullPayload()) {
+                    eventPayloadNode.put("isFullPayload", true);
+                }
+
+                if (eventPayload.isMetaParameter()) {
+                    eventPayloadNode.put("metaParameter", true);
+                }
             }
-        }
-        
-        if (definition.getFullPayloadPropertyName() != null) {
-            modelNode.put("fullPayloadPropertyName", definition.getFullPayloadPropertyName());
         }
 
         try {
