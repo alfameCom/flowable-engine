@@ -12,6 +12,8 @@
  */
 package org.flowable.rest.service.api;
 
+import java.util.Collection;
+
 import org.flowable.batch.api.Batch;
 import org.flowable.batch.api.BatchPart;
 import org.flowable.batch.api.BatchQuery;
@@ -28,6 +30,7 @@ import org.flowable.engine.repository.Model;
 import org.flowable.engine.repository.ModelQuery;
 import org.flowable.engine.repository.ProcessDefinition;
 import org.flowable.engine.repository.ProcessDefinitionQuery;
+import org.flowable.engine.runtime.ActivityInstanceQuery;
 import org.flowable.engine.runtime.Execution;
 import org.flowable.engine.runtime.ExecutionQuery;
 import org.flowable.engine.runtime.ProcessInstance;
@@ -57,6 +60,7 @@ import org.flowable.rest.service.api.identity.GroupRequest;
 import org.flowable.rest.service.api.identity.UserRequest;
 import org.flowable.rest.service.api.repository.ModelRequest;
 import org.flowable.rest.service.api.runtime.VariableInstanceQueryRequest;
+import org.flowable.rest.service.api.runtime.process.ActivityInstanceQueryRequest;
 import org.flowable.rest.service.api.runtime.process.ExecutionActionRequest;
 import org.flowable.rest.service.api.runtime.process.ExecutionChangeActivityStateRequest;
 import org.flowable.rest.service.api.runtime.process.ExecutionQueryRequest;
@@ -65,6 +69,7 @@ import org.flowable.rest.service.api.runtime.process.ProcessInstanceCreateReques
 import org.flowable.rest.service.api.runtime.process.ProcessInstanceQueryRequest;
 import org.flowable.rest.service.api.runtime.process.ProcessInstanceUpdateRequest;
 import org.flowable.rest.service.api.runtime.process.SignalEventReceivedRequest;
+import org.flowable.rest.service.api.runtime.task.BulkTasksRequest;
 import org.flowable.rest.service.api.runtime.task.TaskActionRequest;
 import org.flowable.rest.service.api.runtime.task.TaskQueryRequest;
 import org.flowable.rest.service.api.runtime.task.TaskRequest;
@@ -86,6 +91,12 @@ public interface BpmnRestApiInterceptor {
     
     void accessTaskInfoWithQuery(TaskQuery taskQuery, TaskQueryRequest request);
     
+    void bulkDeleteHistoricProcessInstances(Collection<String> instanceIds);
+
+    void bulkMoveDeadLetterJobs(Collection<String> jobIds, String moveAction);
+
+    void bulkUpdateTasks(Collection<Task> taskList, BulkTasksRequest bulkTasksRequest);
+
     void createTask(Task task, TaskRequest request);
     
     void updateTask(Task task, TaskRequest request);
@@ -110,6 +121,10 @@ public interface BpmnRestApiInterceptor {
 
     void deleteProcessInstance(ProcessInstance processInstance);
     
+    void bulkDeleteProcessInstances(Collection<String> processInstances);
+    
+    void accessActivityInfoWithQuery(ActivityInstanceQuery activityInstanceQuery, ActivityInstanceQueryRequest request);
+
     void accessVariableInfoById(VariableInstance variableInstance);
     
     void accessVariableInfoWithQuery(VariableInstanceQuery variableInstanceQuery, VariableInstanceQueryRequest request);

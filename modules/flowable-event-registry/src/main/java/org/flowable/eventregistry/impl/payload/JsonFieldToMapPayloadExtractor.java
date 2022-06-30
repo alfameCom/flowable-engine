@@ -13,16 +13,13 @@
 package org.flowable.eventregistry.impl.payload;
 
 import java.util.Collection;
-import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.StringUtils;
-import org.flowable.eventregistry.api.FlowableEventInfo;
+import org.flowable.eventregistry.api.InboundEventPayloadExtractor;
 import org.flowable.eventregistry.api.model.EventPayloadTypes;
 import org.flowable.eventregistry.api.runtime.EventPayloadInstance;
 import org.flowable.eventregistry.impl.runtime.EventPayloadInstanceImpl;
 import org.flowable.eventregistry.model.EventModel;
-import org.flowable.eventregistry.model.EventPayload;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,34 +29,24 @@ import com.fasterxml.jackson.databind.JsonNode;
  * @author Joram Barrez
  * @author Filip Hrisafov
  */
-public class JsonFieldToMapPayloadExtractor extends BaseMapPayloadExtractor<JsonNode> {
+public class JsonFieldToMapPayloadExtractor implements InboundEventPayloadExtractor<JsonNode> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JsonFieldToMapPayloadExtractor.class);
 
     @Override
-    public Collection<EventPayloadInstance> extractPayload(EventModel eventModel, FlowableEventInfo<JsonNode> event) {
-        Map<String, Object> filteredHeaders = convertHeaderValues(event, eventModel);
-        Collection<EventPayloadInstance> headerInstances = eventModel.getHeaders().stream()
-                .filter(headerDefinition -> filteredHeaders.containsKey(headerDefinition.getName()))
-                .map(headerDefinition -> new EventPayloadInstanceImpl(headerDefinition, filteredHeaders.get(headerDefinition.getName())))
-                .collect(Collectors.toList());
-        
-        Collection<EventPayloadInstance> payloadInstances = eventModel.getPayload().stream()
-            .filter(payloadDefinition -> event.getPayload().has(payloadDefinition.getName()))
-            .map(payloadDefinition -> new EventPayloadInstanceImpl(payloadDefinition, getPayloadValue(event.getPayload(), 
-                    payloadDefinition.getName(), payloadDefinition.getType())))
+    public Collection<EventPayloadInstance> extractPayload(EventModel eventModel, JsonNode payload) {
+        return eventModel.getPayload().stream()
+            .filter(payloadDefinition -> payloadDefinition.isFullPayload() || payload.has(payloadDefinition.getName()))
+            .map(payloadDefinition -> new EventPayloadInstanceImpl(payloadDefinition, getPayloadValue(payload,
+                    payloadDefinition.getName(), payloadDefinition.getType(), payloadDefinition.isFullPayload())))
             .collect(Collectors.toList());
-        
-        if (StringUtils.isNotEmpty(eventModel.getFullPayloadPropertyName())) {
-            EventPayload fullEventPayloadDefinition = new EventPayload(eventModel.getFullPayloadPropertyName(), EventPayloadTypes.JSON);
-            payloadInstances.add(new EventPayloadInstanceImpl(fullEventPayloadDefinition, event.getPayload()));
-        }
-        
-        payloadInstances.addAll(headerInstances);
-        return payloadInstances;
     }
 
-    protected Object getPayloadValue(JsonNode event, String definitionName, String definitionType) {
+    protected Object getPayloadValue(JsonNode event, String definitionName, String definitionType, boolean isFullPayload) {
+        if (isFullPayload) {
+            return event;
+        }
+        
         JsonNode parameterNode = event.get(definitionName);
         Object value = null;
 
