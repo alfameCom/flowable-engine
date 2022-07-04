@@ -47,11 +47,11 @@ jobs:
 
       - name: Tag lastest flowable-ui image
         if: github.event_name == 'push' && github.ref == 'refs/heads/alfame'
-        run: docker tag flowable/flowable-ui "ghcr.io/alfamecom/flowable-ui:${GITHUB_SHA:0:7}"
+        run: docker tag flowable-ui "ghcr.io/alfamecom/flowable-ui:${GITHUB_SHA:0:7}"
 
       - name: Tag lastest flowable-rest image
         if: github.event_name == 'push' && github.ref == 'refs/heads/alfame'
-        run: docker tag flowable/flowable-rest "ghcr.io/alfamecom/flowable-rest:${GITHUB_SHA:0:7}"
+        run: docker tag flowable-rest "ghcr.io/alfamecom/flowable-rest:${GITHUB_SHA:0:7}"
 
       - name: Push flowable-ui image to GitHub Container Registry
         if: github.event_name == 'push' && github.ref == 'refs/heads/alfame'
